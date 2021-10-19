@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "grpc/proto";
+
+message EmailMessage {
+    string emailAddress = 1;
+    string body = 2;
+}
+
+message EmailMessageResponse {
+    bool processing = 1;
+}
+
+service EmailNotification {
+    rpc SendEmail (EmailMessage) returns (EmailMessageResponse);
+}
