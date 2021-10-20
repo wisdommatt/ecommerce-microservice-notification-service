@@ -27,7 +27,7 @@ func NewEmailHandler(mailer mailit.TextMailer) *EmailHandler {
 func (h *EmailHandler) HandleSendEmail(msg *nats.Msg) error {
 	span := opentracing.StartSpan("nats.handlers.HandleSendEmail")
 	defer span.Finish()
-	span.SetTag("params.msg", msg)
+	span.SetTag("params.msg.subject", msg.Subject).SetTag("params.msg.data", string(msg.Data))
 	sendEmailMsg := messages.SendEmail{}
 	err := json.Unmarshal(msg.Data, &sendEmailMsg)
 	if err != nil {
