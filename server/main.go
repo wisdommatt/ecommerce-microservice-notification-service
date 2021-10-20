@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/nats-io/nats.go"
@@ -29,9 +30,13 @@ func main() {
 	defer panicSpan.Finish()
 	defer panick.RecoverFromPanic(tracing.ContextWithSpan(context.Background(), panicSpan))
 
-	natsClient, err := nats.Connect(os.Getenv("NATS_URI"))
+	natsClient, err := nats.Connect(os.Getenv("NATS_URI"),
+		nats.RetryOnFailedConnect(true),
+		nats.MaxReconnects(10),
+		nats.ReconnectWait(2*time.Second),
+	)
 	if err != nil {
-		log.WithError(err).WithField("nats uri", os.Getenv("NATS_URI")).
+		log.WithError(err).WithField("nats_uri", os.Getenv("NATS_URI")).
 			Fatal("an error occured while connecting to nats server")
 		return
 	}
@@ -49,13 +54,23 @@ func main() {
 		Password: os.Getenv("MAIL_SMTP_PASSWORD"),
 		Port:     mailSmtpPort,
 	})
+	log.WithField("nats_uri", os.Getenv("NATS_URI")).Info("app running & listening for incoming events")
 	emailHandler := handlers.NewEmailHandler(mailler)
-	natsClient.Subscribe("notification.SendEmail", emailHandler.HandleSendEmail)
+	natsClient.Subscribe("notification.SendEmail", wrapNatsEventHandler(emailHandler.HandleSendEmail))
+	for {
+		// do nothing
+	}
 }
 
 func mustLoadDotenv(log *logrus.Logger) {
 	err := godotenv.Load(".env", ".env-defaults")
 	if err != nil {
 		log.WithError(err).Fatal("Unable to load env files")
+	}
+}
+
+func wrapNatsEventHandler(f handlers.NatsEventHandler) func(*nats.Msg) {
+	return func(m *nats.Msg) {
+		f(m)
 	}
 }
