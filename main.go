@@ -17,6 +17,8 @@ import (
 	"github.com/wisdommatt/mailit"
 )
 
+type NatsEventHandler func(msg *nats.Msg) error
+
 func main() {
 	log := logrus.New()
 	log.SetFormatter(&logrus.JSONFormatter{PrettyPrint: true})
@@ -67,7 +69,7 @@ func mustLoadDotenv(log *logrus.Logger) {
 	}
 }
 
-func wrapNatsEventHandler(f handlers.NatsEventHandler) func(*nats.Msg) {
+func wrapNatsEventHandler(f NatsEventHandler) func(*nats.Msg) {
 	return func(m *nats.Msg) {
 		f(m)
 	}
