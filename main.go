@@ -17,8 +17,6 @@ import (
 	"github.com/wisdommatt/mailit"
 )
 
-type NatsEventHandler func(msg *nats.Msg) error
-
 func main() {
 	log := logrus.New()
 	log.SetFormatter(&logrus.JSONFormatter{PrettyPrint: true})
@@ -30,16 +28,7 @@ func main() {
 	serviceTracer := initTracer("notificaton-service")
 	tracing.SetGlobalTracer(serviceTracer)
 
-	natsClient, err := nats.Connect(os.Getenv("NATS_URI"),
-		nats.RetryOnFailedConnect(true),
-		nats.MaxReconnects(10),
-		nats.ReconnectWait(2*time.Second),
-	)
-	if err != nil {
-		log.WithError(err).WithField("nats_uri", os.Getenv("NATS_URI")).
-			Fatal("an error occured while connecting to nats server")
-		return
-	}
+	natsClient := mustConnectToNats(log)
 	defer natsClient.Close()
 
 	mailSmtpPort, err := strconv.Atoi(os.Getenv("MAIL_SMTP_PORT"))
@@ -55,8 +44,7 @@ func main() {
 		Port:     mailSmtpPort,
 	})
 	log.WithField("nats_uri", os.Getenv("NATS_URI")).Info("app running & listening for incoming events")
-	emailHandler := handlers.NewEmailHandler(mailler)
-	natsClient.Subscribe("notification.SendEmail", wrapNatsEventHandler(emailHandler.HandleSendEmail))
+	natsClient.Subscribe("notification.SendEmail", wrapNatsEventHandler(handlers.HandleSendEmail(mailler)))
 	for {
 		// do nothing
 	}
@@ -69,7 +57,21 @@ func mustLoadDotenv(log *logrus.Logger) {
 	}
 }
 
-func wrapNatsEventHandler(f NatsEventHandler) func(*nats.Msg) {
+func mustConnectToNats(log *logrus.Logger) *nats.Conn {
+	natsClient, err := nats.Connect(os.Getenv("NATS_URI"),
+		nats.RetryOnFailedConnect(true),
+		nats.MaxReconnects(10),
+		nats.ReconnectWait(2*time.Second),
+	)
+	if err != nil {
+		log.WithError(err).WithField("nats_uri", os.Getenv("NATS_URI")).
+			Fatal("an error occured while connecting to nats server")
+		return nil
+	}
+	return natsClient
+}
+
+func wrapNatsEventHandler(f handlers.NatsEventHandler) func(*nats.Msg) {
 	return func(m *nats.Msg) {
 		f(m)
 	}

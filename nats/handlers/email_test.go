@@ -54,10 +54,8 @@ func TestEmailHandler_HandleSendEmail(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := NewEmailHandler(&TextMailerMock{
-				SendTextFunc: tt.SendTextFunc,
-			})
-			if err := h.HandleSendEmail(tt.args.msg); (err != nil) != tt.wantErr {
+			mailer := &TextMailerMock{SendTextFunc: tt.SendTextFunc}
+			if err := HandleSendEmail(mailer)(tt.args.msg); (err != nil) != tt.wantErr {
 				t.Errorf("EmailHandler.HandleSendEmail() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
