@@ -1,18 +1,19 @@
 package main
 
 import (
-	"context"
+	"log"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/nats-io/nats.go"
+	"github.com/opentracing/opentracing-go"
 	tracing "github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
+	"github.com/uber/jaeger-client-go"
+	"github.com/uber/jaeger-client-go/config"
 	"github.com/wisdommatt/ecommerce-microservice-notification-service/nats/handlers"
-	"github.com/wisdommatt/ecommerce-microservice-notification-service/pkg/panick"
-	"github.com/wisdommatt/ecommerce-microservice-notification-service/pkg/tracer"
 	"github.com/wisdommatt/mailit"
 )
 
@@ -24,11 +25,8 @@ func main() {
 
 	mustLoadDotenv(log)
 
-	serviceTracer := tracer.Init("notificaton-service")
+	serviceTracer := initTracer("notificaton-service")
 	tracing.SetGlobalTracer(serviceTracer)
-	panicSpan := serviceTracer.StartSpan("panic-span")
-	defer panicSpan.Finish()
-	defer panick.RecoverFromPanic(tracing.ContextWithSpan(context.Background(), panicSpan))
 
 	natsClient, err := nats.Connect(os.Getenv("NATS_URI"),
 		nats.RetryOnFailedConnect(true),
@@ -73,4 +71,23 @@ func wrapNatsEventHandler(f handlers.NatsEventHandler) func(*nats.Msg) {
 	return func(m *nats.Msg) {
 		f(m)
 	}
+}
+
+func initTracer(serviceName string) opentracing.Tracer {
+	return initJaegerTracer(serviceName)
+}
+
+func initJaegerTracer(serviceName string) opentracing.Tracer {
+	cfg := &config.Configuration{
+		ServiceName: serviceName,
+		Sampler: &config.SamplerConfig{
+			Type:  "const",
+			Param: 1,
+		},
+	}
+	tracer, _, err := cfg.NewTracer(config.Logger(jaeger.StdLogger))
+	if err != nil {
+		log.Fatal("ERROR: cannot init Jaeger", err)
+	}
+	return tracer
 }
