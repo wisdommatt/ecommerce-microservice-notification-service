@@ -4,7 +4,7 @@ services:
   app:
     container_name: notification-service
     image: golang:1.17.2-stretch
-    command: ["sh", "-c", "go mod download && go run server/main.go"]
+    command: ["sh", "-c", "go mod download && go run main.go"]
     ports:
       - '2121:2121'
     environment:
