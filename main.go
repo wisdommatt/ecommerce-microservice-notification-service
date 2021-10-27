@@ -45,6 +45,10 @@ func main() {
 	})
 	log.WithField("nats_uri", os.Getenv("NATS_URI")).Info("app running & listening for incoming events")
 	natsClient.Subscribe("notification.SendEmail", wrapNatsEventHandler(handlers.HandleSendEmail(mailler)))
+	natsClient.Subscribe(
+		"notification.SendProductAddedEmail",
+		wrapNatsEventHandler(handlers.HandleSendProductAddedEmail(mailler)),
+	)
 	for {
 		// do nothing
 	}

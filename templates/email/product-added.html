@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta chatset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Droid+Sans:400,700" rel="stylesheet">
+  </head>
+
+  <style>
+    * {
+      margin: 0;
+      border: 0;
+      padding: 0;
+      outline: 0;
+    }
+
+    body,
+    html {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      background: url("http://www.designkorner.com/dk-administrator/prod_images/Ecommerce-web-design5.jpg") no-repeat;
+      background-size: cover;
+      font-family: 'Droid Sans', sans-serif;
+    }
+
+    .clearfix {
+      content: "";
+      display: table;
+    }
+
+    .shop-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: #222;
+      opacity: 0.8;
+    }
+
+    .pop-up {
+      width: 900px;
+      height: auto;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 80px;
+      position: relative;
+      background: #fff;
+      padding: 30px;
+      border-radius: 2px;
+    }
+
+    /*GALLERY*/
+    .pics {
+      float: left;
+      width: 460px;
+      margin-right: 0;
+    }
+
+    .pics span {
+      display: block;
+    }
+
+    .main-img img {
+      display: block;
+      border: 0.5px solid #ddd;
+      border-radius: 2px;
+      padding: 60px 30px;
+      width: 390px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .additional-img img {
+      float: left;
+      /*display: inline-block has  automatic margin right and bottom :( */
+      width: 98px;
+      height: 45px;
+      padding: 10px 5px;
+      border: 0.5px solid #ddd;
+      border-radius: 2px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+
+    .additional-img img:nth-child(4) {
+      margin-right: 0;
+    }
+
+    .additional-img img:hover,
+    .main-img img:hover {
+      box-shadow: 0 0 6px #ddd;
+    }
+
+    /*PRODUCT INFORMATION*/
+    .product {
+      float: right;
+      width: 430px;
+    }
+
+    span.category {
+      display: block;
+      font-weight: 700;
+      color: #888;
+      font-size: 12px;
+      line-height: 14px;
+      font-style: italic;
+    }
+
+    .product .category:hover {
+      color: #999;
+      cursor: pointer;
+    }
+
+    .product h1 {
+      width: 300px;
+      font-size: 21px;
+      line-height: 24px;
+      margin-top: 5px;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /*STOCK LABEL*/
+    span.stock {
+      display: block;
+      float: right;
+      position: relative;
+      top: 4px;
+      line-height: 11px;
+      padding: 6px 12px 5px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #fff;
+      background: #18d11f;
+      border-radius: 14px;
+      letter-spacing: 0.3px;
+    }
+
+    /*PRICE & RATING*/
+    .block-price-rating {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .block-price {
+      float: left;
+      width: auto;
+      margin-right: 20px;
+    }
+
+    .price-new {
+      float: left;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .price-new-dollar {
+      float: left;
+      display: block;
+      font-size: 24px;
+      margin-right: 5px;
+      color: #333;
+    }
+
+    .price-new-cent {
+      font-size: 14px;
+    }
+
+    .price-old {
+      text-decoration: line-through;
+      color: #444;
+      font-size: 14px;
+      position: relative;
+      top: 6px;
+    }
+
+    /*rating*/
+    .block-rating {
+      float: right;
+      position: relative;
+      top: 2px;
+    }
+
+    span.rating img {
+      display: block;
+      float: left;
+      width: 110px;
+      margin-left: 10px;
+    }
+
+    span.rating img:hover {
+      cursor: pointer;
+    }
+
+    /*review*/
+    span.review {
+      display: block;
+      float: left;
+      position: relative;
+      top: 6px;
+      font-weight: 700;
+      color: #888;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    span.review:hover {
+      color: #999;
+      cursor: pointer;
+    }
+
+    /*PRODUCT DESCRIPTION*/
+    .descr {
+      font-size: 14px;
+      line-height: 18px;
+      color: #444;
+      letter-spacing: 0.3px;
+      margin-top: 10px;
+      width: 430px;
+      height: 71px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: no-wrap;
+    }
+
+    /*SELECT BLOCK*/
+    .block-select {
+      margin-top: 15px;
+    }
+
+    .select-color,
+    .select-size {
+      float: left;
+      font-size: 14px;
+      font-weight: 700;
+      color: #888;
+    }
+
+    .select-color span,
+    .select-size span {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    select.color {
+      width: 320px;
+      margin-right: 10px;
+    }
+
+    select.size {
+      width: 100px;
+    }
+
+    select.color,
+    select.size {
+      padding: 8px 10px;
+      border: 0.5px solid #ddd;
+      border-radius: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: 0.7;
+      letter-spacing: 0.3px;
+    }
+
+    /*BUTTON*/
+    .btn {
+      margin: 10px auto;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      padding: 15px 0;
+      width: 100%;
+      border-radius: 2px;
+      cursor: pointer;
+      background: #fd7064;
+    }
+
+    .btn:hover {
+      background: #fc796f;
+    }
+
+    /*LINKS*/
+    .block-footer {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .block-links {
+      float: left;
+      cursor: pointer;
+    }
+
+    .block-links img {
+      width: 20px;
+      opacity: 0.3;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    .block-links span {
+      font-size: 11px;
+      color: #888;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      font-style: italic;
+    }
+
+    .block-links span:hover {
+      color: #999;
+    }
+
+    .wishlist {
+      margin-top: 5px;
+    }
+
+    /*SOCIAL*/
+    .social {
+      float: right;
+      position: relative;
+      top: 5px;
+    }
+
+    .social img {
+      width: 36px;
+      opacity: 0.3;
+      cursor: pointer;
+      margin-right: 3px;
+      display: inline;
+    }
+
+    .social img:nth-child(4) {
+      margin-right: 0;
+    }
+
+    .social img:hover {
+      opacity: 0.2;
+    }
+  </style>
+
+  <body>
+
+    <div class="content">
+      <div class="shop-bg"></div>
+      <div class="pop-up clearfix">
+        <!--GALLERY-->
+        <div class="pics">
+          <span class="main-img"><img src="{{ .ProductImageURL }}"></span>
+        </div>
+        <!-- PRODUCT INFORMATION -->
+        <div class="product">
+          <!--category-breadcrumb-->
+          <span class="category">{{ .ProductCategory }}</span>
+          <!--stock-label-->
+          <span class="stock">In Stock</span>
+          <h1>{{ .ProductName }}</h1>
+          <!--PRICE-RATING-REVIEW-->
+          <div class="block-price-rating clearfix">
+            <!--price-->
+            <div class="block-price clearfix">
+              <div class="price-new clearfix">
+                <span class="price-new-dollar">${{ .ProductPrice }}</span>
+              </div>
+              <div class="price-old clearfix">
+                <span class="price-old-dollar">${{{ .ProductPrice }}}</span>
+              </div>
+            </div>
+            <!--rating-->
+            
+          </div>
+          <!-- rating <ul class="rating"> <li></li> <li></li> <li></li> <li></li> <li></li> </ul> -->
+          <!--PRODUCT DESCRIPTION-->
+          <div class="descr">
+            <p>{{ .ProductDescription }}</p>
+          </div>
+          <!--SELECT BLOCK-->
+          <div class="block-select">
+            <form>
+              <!-- <div class="select-color">
+                <span>Select Color</span>
+                <select class="color">
+                  <option>Cognac</option>
+                  <option>Black</option>
+                </select>
+              </div> -->
+              <!-- <div class="select-size">
+                <span>Size</span>
+                <select class="size">
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+                </select>
+              </div> -->
+              <!--BUTTON-->
+              <button class="btn"><img src="">Add to cart</button>
+            </form>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

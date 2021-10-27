@@ -19,6 +19,20 @@ type sendEmailMessage struct {
 	Body    string `json:"body"`
 }
 
+type sendProductAddedEmail struct {
+	To         string                      `json:"to"`
+	Subject    string                      `json:"subject"`
+	Parameters productAddedEmailParameters `json:"parameters"`
+}
+
+type productAddedEmailParameters struct {
+	ProductName        string  `json:"productName"`
+	ProductImageURL    string  `json:"productImageUrl"`
+	ProductCategory    string  `json:"productCategory"`
+	ProductPrice       float64 `json:"productPrice"`
+	ProductDescription string  `json:"productDescription"`
+}
+
 // HandleSendEmail is the event handler for notification.SendEmail event.
 func HandleSendEmail(mailer mailit.TextMailer) NatsEventHandler {
 	return func(msg *nats.Msg) error {
@@ -43,6 +57,39 @@ func HandleSendEmail(mailer mailit.TextMailer) NatsEventHandler {
 			msg.Nak()
 			ext.Error.Set(span, true)
 			span.LogFields(log.Error(err), log.Event("mailit.SendText"))
+			return err
+		}
+		msg.Ack()
+		return nil
+	}
+}
+
+// HandleSendProductAddedEmail is the event handler for notification.SendProductAddedEmail
+// nats event.
+func HandleSendProductAddedEmail(mailer mailit.TemplateMailer) NatsEventHandler {
+	return func(msg *nats.Msg) error {
+		span := opentracing.StartSpan("nats.handlers.HandleSendProductAddedEmail")
+		defer span.Finish()
+		sendEmailMsg := sendProductAddedEmail{}
+		err := json.Unmarshal(msg.Data, &sendEmailMsg)
+		if err != nil {
+			ext.Error.Set(span, true)
+			span.LogFields(log.Error(err), log.Event("json.Unmarshal"), log.String("data", string(msg.Data)))
+			return err
+		}
+		span.SetTag("nats.message", sendEmailMsg)
+		err = mailer.SendTemplate(mailit.TemplateDependencies{
+			From:         os.Getenv("DEFAULT_EMAIL_ADDRESS"),
+			Subject:      sendEmailMsg.Subject,
+			To:           []string{sendEmailMsg.To},
+			ContentType:  "text/html",
+			Template:     "templates/email/product-added.html",
+			TemplateData: sendEmailMsg.Parameters,
+		})
+		if err != nil {
+			msg.Nak()
+			ext.Error.Set(span, true)
+			span.LogFields(log.Error(err), log.Event("mailit.SendTemplate"))
 			return err
 		}
 		msg.Ack()
