@@ -83,7 +83,7 @@ func TestHandleSendProductAddedEmail(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "mailer.SentTemplate implementation with error",
+			name: "mailer.SendTemplate implementation with error",
 			args: args{
 				msg: &nats.Msg{
 					Data: []byte(`{"to": "hello@example.com"}`),
@@ -95,7 +95,7 @@ func TestHandleSendProductAddedEmail(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "mailer.SentTemplate implementation without error",
+			name: "mailer.SendTemplate implementation without error",
 			args: args{
 				msg: &nats.Msg{
 					Data: []byte(`{"to": "hello@example.com"}`),
