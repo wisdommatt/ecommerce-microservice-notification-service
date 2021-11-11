@@ -26,11 +26,11 @@ type sendProductAddedEmail struct {
 }
 
 type productAddedEmailParameters struct {
-	ProductName        string  `json:"productName"`
-	ProductImageURL    string  `json:"productImageUrl"`
-	ProductCategory    string  `json:"productCategory"`
-	ProductPrice       float64 `json:"productPrice"`
-	ProductDescription string  `json:"productDescription"`
+	ProductName        string `json:"productName"`
+	ProductImageURL    string `json:"productImageUrl"`
+	ProductCategory    string `json:"productCategory"`
+	ProductPrice       string `json:"productPrice"`
+	ProductDescription string `json:"productDescription"`
 }
 
 // HandleSendEmail is the event handler for notification.SendEmail event.
