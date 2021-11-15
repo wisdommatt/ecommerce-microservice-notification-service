@@ -44,10 +44,10 @@ func main() {
 		Port:     mailSmtpPort,
 	})
 	log.WithField("nats_uri", os.Getenv("NATS_URI")).Info("app running & listening for incoming events")
-	natsClient.Subscribe("notification.SendEmail", wrapNatsEventHandler(handlers.HandleSendEmail(mailler)))
+	natsClient.Subscribe("notification.SendEmail", wrapNatsEventHandler(log, handlers.HandleSendEmail(mailler)))
 	natsClient.Subscribe(
 		"notification.SendProductAddedEmail",
-		wrapNatsEventHandler(handlers.HandleSendProductAddedEmail(mailler)),
+		wrapNatsEventHandler(log, handlers.HandleSendProductAddedEmail(mailler)),
 	)
 	for {
 		// do nothing
@@ -75,9 +75,12 @@ func mustConnectToNats(log *logrus.Logger) *nats.Conn {
 	return natsClient
 }
 
-func wrapNatsEventHandler(f handlers.NatsEventHandler) func(*nats.Msg) {
+func wrapNatsEventHandler(log *logrus.Logger, f handlers.NatsEventHandler) func(*nats.Msg) {
 	return func(m *nats.Msg) {
-		f(m)
+		err := f(m)
+		if err != nil {
+			log.WithError(err).Error("an error occured while handling nats event")
+		}
 	}
 }
 
